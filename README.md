@@ -4,7 +4,7 @@
 
 <h3 align="center">DeepSeek Harness 桌面版</h3>
 
-<p align="center">双击即用的 AI Agent 工作台 — 基于 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的便携桌面客户端</p>
+<p align="center">双击即用的 AI Agent 工作台 — 基于 [DeepSeek Harness](https://github.com/Ringlingo/deepseek-harness) 的便携桌面客户端</p>
 
 <p align="center">
   <a href="#下载">下载</a> ·
@@ -123,7 +123,7 @@ dsh-desktop/
 |------|------|
 | 壳 | [Tauri 2](https://tauri.app/) (Rust) |
 | 前端 | HTML/CSS/JS 注入（基于 DSH Web UI） |
-| 后端 | [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (Node.js + Cordis) |
+| 后端 | [DeepSeek Harness](https://github.com/Ringlingo/deepseek-harness) (Node.js + Cordis) |
 | 运行时 | Node.js 22.19+ |
 
 ## 质量红线
@@ -146,7 +146,7 @@ dsh-desktop/
 
 ## 相关项目
 
-- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) — Agent 工具核心
+- [DeepSeek Harness](https://github.com/Ringlingo/deepseek-harness) — Agent 工具核心
 - [Cordis](https://github.com/cordiverse/cordis) — 插件框架
 - [Tauri](https://tauri.app/) — 桌面应用框架
 

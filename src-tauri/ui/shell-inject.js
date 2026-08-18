@@ -186,7 +186,7 @@
   var helpItems = [
     { label: "切换开发人员工具", shortcut: "Ctrl+Shift+I", action: function () { api("/api/shell/devtools", { enabled: true }); } },
     null,
-    { label: "查看 GitHub", action: function () { api("/api/shell/open-external", { url: "https://github.com/deepseek-ai/deepseek-harness" }); } },
+    { label: "查看 GitHub", action: function () { api("/api/shell/open-external", { url: "https://github.com/Ringlingo/deepseek-harness" }); } },
     { label: "开发者文档", action: function () { api("/api/shell/open-external", { url: "https://deepseek-harness.github.io/deepseek-harness/guide/quickstart" }); } },
     { label: "社区插件", action: function () { api("/api/shell/open-external", { url: "https://github.com/topics/dsh-plugin" }); } },
     { label: "Cordis 论文", action: function () { api("/api/shell/open-external", { url: "https://github.com/cordiverse/paper" }); } }
