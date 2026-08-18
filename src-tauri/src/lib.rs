@@ -111,13 +111,13 @@ pub fn run() {
 
             // 托盘（F-03）。
             if let Err(e) = tray::create_tray(app.handle()) {
-                debug_log(&format!("托盘创建失败: {e}"));
+                debug_log(&format!("Tray creation failed: {e}"));
             }
 
             // 壳 HTTP 桥（注入脚本数据通道，纯 std）。
             let backend = app.state::<AppState>().backend.clone();
             let bridge_port = shell_bridge::start(backend, portable_root());
-            debug_log(&format!("壳桥端口: {bridge_port}"));
+            debug_log(&format!("Shell bridge port: {bridge_port}"));
 
             // 日志流 → 前端事件（F-08）：std 线程消费 mpsc，emit 线程安全。
             let app_handle = app.handle().clone();
@@ -137,7 +137,7 @@ pub fn run() {
                 match backend_start_and_navigate(&app_handle, &backend, bridge_port) {
                     Ok(()) => {}
                     Err(e) => {
-                        debug_log(&format!("启动失败: {e}"));
+                        debug_log(&format!("Startup failed: {e}"));
                         let _ = app_handle.emit("backend://error", e.to_string());
                     }
                 }
@@ -156,7 +156,7 @@ pub fn run() {
         .run(move |_app_handle, event| {
             // R3：退出时清理后端进程树（同步 stop）。
             if let tauri::RunEvent::Exit = event {
-                debug_log("退出：清理后端进程树");
+                debug_log("Exit: cleaning up backend process tree");
                 backend_for_exit.stop();
             }
         });
@@ -169,14 +169,14 @@ fn backend_start_and_navigate(
 ) -> Result<(), error::AppError> {
     let cfg = BackendSpawnConfig::from_root(&portable_root())?;
     let (_, url) = backend.start(&cfg, 90)?;
-    debug_log(&format!("[nav] 准备 navigate 到 {url}"));
+    debug_log(&format!("[nav] Navigating to {url}"));
     if let Some(win) = app.get_webview_window("main") {
         let url: tauri::Url = url.parse().map_err(|e| {
             error::AppError::new(error::AppErrorCode::Internal, format!("URL 解析失败: {e}"))
         })?;
         match win.navigate(url.clone()) {
-            Ok(_) => debug_log(&format!("[nav] navigate 成功: {url}")),
-            Err(e) => debug_log(&format!("[nav] navigate 失败: {e}")),
+            Ok(_) => debug_log(&format!("[nav] Navigate success: {url}")),
+            Err(e) => debug_log(&format!("[nav] Navigate failed: {e}")),
         }
         let app_clone = app.clone();
         std::thread::spawn(move || {

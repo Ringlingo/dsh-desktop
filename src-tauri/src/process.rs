@@ -179,7 +179,7 @@ impl BackendProcess {
 
     /// 启动后端并等待就绪（同步；Condvar 等待，超时 timeout_secs 秒）。
     pub fn start(self: &Arc<Self>, cfg: &BackendSpawnConfig, timeout_secs: u64) -> AppResult<(u16, String)> {
-        crate::debug_log("start(): 进入");
+        crate::debug_log("start(): entered");
         {
             let mut guard = self.child.lock().unwrap();
             if guard.is_some() {
@@ -307,7 +307,7 @@ impl BackendProcess {
         });
 
         // 等待就绪或超时（Condvar wait_timeout，不依赖 tokio time）。
-        crate::debug_log("start(): 等待就绪行...");
+        crate::debug_log("start(): waiting for ready line...");
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(timeout_secs);
         let result = loop {
             {
@@ -326,7 +326,7 @@ impl BackendProcess {
             let (g, _) = self.ready_cv.wait_timeout(guard, std::time::Duration::from_millis(200)).unwrap();
             drop(g);
         };
-        crate::debug_log("start(): 等待结束");
+        crate::debug_log("start(): wait finished");
 
         match &result {
             Ok((_, url)) => {

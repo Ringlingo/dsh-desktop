@@ -24,12 +24,12 @@ pub fn start(backend: Arc<BackendProcess>, root: PathBuf) -> u16 {
     {
         Some(l) => l,
         None => {
-            crate::debug_log("HTTP 桥绑定失败（无可用端口）");
+            crate::debug_log("HTTP bridge bind failed (no available port)");
             return 0;
         }
     };
     let port = listener.local_addr().map(|a| a.port()).unwrap_or(0);
-    crate::debug_log(&format!("HTTP 桥监听 127.0.0.1:{port}"));
+    crate::debug_log(&format!("HTTP bridge listening 127.0.0.1:{port}"));
     std::thread::spawn(move || {
         for stream in listener.incoming().flatten() {
             let backend = backend.clone();
@@ -305,6 +305,19 @@ fn route(
             }
             json_ok(serde_json::json!({ "ok": true }))
         }
+        "/api/shell/settings" => {
+            let settings_path = root.join("data").join("settings.yaml");
+            let content = std::fs::read_to_string(&settings_path).unwrap_or_default();
+            let locale = content.lines()
+                .find(|l| l.trim_start().starts_with("locale:"))
+                .and_then(|_| content.lines()
+                    .skip_while(|l| !l.trim_start().starts_with("locale:"))
+                    .nth(1)
+                    .and_then(|l| l.split(':').nth(1))
+                    .map(|s| s.trim().to_string()))
+                .unwrap_or_else(|| "zh".to_string());
+            json_ok(serde_json::json!({ "locale": locale }))
+        }
         _ => json_err("未知路由"),
     }
 }
@@ -328,7 +341,7 @@ fn proxy_dsh_page(dsh_port: u16, bridge_port: u16) -> Result<String, String> {
     html = html.replace("href=\"/", &format!("href=\"{dsh_origin}/"));
 
     let inject_tag = format!(
-        r#"<script>window.DSH_SHELL_PORT={bridge_port};</script><script src="http://127.0.0.1:{bridge_port}/api/shell/inject.js"></script>"#
+        r#"<script>window.DSH_SHELL_PORT={bridge_port};</script><script src="http://127.0.0.1:{bridge_port}/api/shell/inject.js?t={dsh_port}"></script>"#
     );
     if let Some(pos) = html.find("</head>") {
         html.insert_str(pos, &inject_tag);

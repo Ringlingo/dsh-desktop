@@ -13,6 +13,17 @@
 
   // ---------- i18n ----------
   var lang = (navigator.language || "zh").startsWith("zh") ? "zh" : "en";
+  // 尝试从 DSH 设置读取语言偏好（同步，覆盖系统语言）
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", BASE + "/api/shell/settings", false);
+    xhr.timeout = 2000;
+    xhr.send();
+    if (xhr.status === 200) {
+      var s = JSON.parse(xhr.responseText);
+      if (s && s.locale) lang = s.locale;
+    }
+  } catch (e) {}
   var i18n = {
     zh: {
       edit: "编辑(E)", help: "帮助(H)",
@@ -20,24 +31,26 @@
       devtools: "切换开发人员工具", viewGithub: "查看 GitHub", docs: "开发者文档", plugins: "社区插件", cordis: "Cordis 论文",
       min: "最小化", max: "最大化", close: "关闭",
       balance: "余额", console: "控制台",
-      noData: t("noData"), queryFail: t("queryFail"),
+      noData: "暂无数据（点击刷新重试）", queryFail: "查询失败: ",
       total: "总额", granted: "赠送", topped: "充值",
       dshBackend: "DSH 后端", port: "端口", disconnected: "未连接",
       logs: "日志", ops: "操作", settings: "设置",
       realtimeLog: "实时日志流", items: "条", export: "导出", clear: "清空", pause: "暂停", resume: "恢复",
       status: "状态", pid: "PID", version: "版本",
       healthCheck: "健康检查", restart: "重启后端", checkUpdate: "检查更新", updateTo: "更新到最新版",
-      healthTip: t('healthTip'),
-      noLogs: t("noLogs"), exported: t("exported"), exportFailed: t("exportFailed"), logCleared: t("logCleared"),
-      healthRunning: t("healthRunning"), healthResult: t('healthResult'), serviceReply:  + t('serviceReply') + ',
-      healthFailed: t("healthFailed"), confirmRestart: t("confirmRestart"),
-      restarting: t("restarting"), restarted: t('restarted'), restartFailed: t("restartFailed"),
-      checkingUpdate: t("checkingUpdate"), checkFailed: t("checkFailed"), newVersion: t('newVersion'), latest: t('latest'),
-      confirmUpdate: t('confirmUpdate'), updateNote:  + t('updateNote'),
-      updateWaiting: t('updateWaiting'),
-      selectProvider: t("selectProvider"),
-      injectError: t('injectError'),
-      textFile: "文本文件"
+      healthTip: '健康检查=端口通+服务能应答；重启会自动恢复；导出日志见"日志"标签。',
+      noLogs: "暂无日志可导出", exported: "已导出 ", exportFailed: "导出失败: ", logCleared: "日志视图已清空",
+      healthRunning: "正在健康检查…", healthResult: "健康检查：端口连通 ", serviceReply: " · 服务应答 ",
+      healthFailed: "健康检查失败: ", confirmRestart: "确定重启 DSH 后端？当前会话会中断。",
+      restarting: "正在重启后端…", restarted: "后端已重启，端口 ", restartFailed: "重启失败: ",
+      checkingUpdate: "正在检查更新…", checkFailed: "检查失败: ", newVersion: "发现新版本 ", latest: "已是最新版本",
+      confirmUpdate: "确定更新到 ", updateNote: "？更新包地址需 M5 打包流水线产出。",
+      updateWaiting: "更新：等待打包流水线接入下载 URL…",
+      selectProvider: "请先选择 provider",
+      injectError: "注入错误: ",
+      textFile: "文本文件",
+      settingsTip: "余额与 provider 均由 DSH 自动发现；如需手动覆盖请选择 Provider 并点击应用。",
+      shellError: "壳连接错误: "
     },
     en: {
       edit: "Edit(E)", help: "Help(H)",
@@ -45,14 +58,14 @@
       devtools: "Toggle DevTools", viewGithub: "View GitHub", docs: "Developer Docs", plugins: "Community Plugins", cordis: "Cordis Paper",
       min: "Minimize", max: "Maximize", close: "Close",
       balance: "Balance", console: "Console",
-      noData: "No data (click to retry)", queryFailed: "Query failed: ",
+      noData: "No data (click to retry)", queryFail: "Query failed: ",
       total: "Total", granted: "Granted", topped: "Topped up",
       dshBackend: "DSH Backend", port: "Port", disconnected: "Disconnected",
       logs: "Logs", ops: "Operations", settings: "Settings",
       realtimeLog: "Real-time log stream", items: "", export: "Export", clear: "Clear", pause: "Pause", resume: "Resume",
       status: "Status", pid: "PID", version: "Version",
       healthCheck: "Health Check", restart: "Restart Backend", checkUpdate: "Check Update", updateTo: "Update to Latest",
-      healthTip: "Health check = port reachable + service responds; restart auto-recovers; see "Logs" tab to export.",
+      healthTip: 'Health check = port reachable + service responds; restart auto-recovers; see "Logs" tab to export.',
       noLogs: "No logs to export", exported: "Exported ", exportFailed: "Export failed: ", logCleared: "Log view cleared",
       healthRunning: "Running health check…", healthResult: "Health check: port ", serviceReply: " · service ",
       healthFailed: "Health check failed: ", confirmRestart: "Restart DSH backend? Current session will be interrupted.",
@@ -62,7 +75,9 @@
       updateWaiting: "Update: waiting for pipeline download URL…",
       selectProvider: "Please select a provider first",
       injectError: "Injection error: ",
-      textFile: "Text file"
+      textFile: "Text file",
+      settingsTip: "Balance and provider are auto-discovered by DSH; select a Provider and click Apply to override.",
+      shellError: "Shell connection error: "
     }
   };
   function t(key) { return (i18n[lang] && i18n[lang][key]) || i18n.zh[key] || key; }
@@ -346,15 +361,15 @@
   bal.id = "dshp-bal";
   bal.title = t('balance') + ' — ' + (lang === 'zh' ? '点击刷新' : 'Click to refresh');
   bal.style.cssText = btnStyle + ";min-width:80px;font-size:12.5px";
-  bal.innerHTML = '<span style="font-size:14px;font-weight:600;line-height:1;flex-shrink:0">\u00A5</span><span class="label" style="margin-left:4px">余额 --</span>';
+  bal.innerHTML = '<span style="font-size:14px;font-weight:600;line-height:1;flex-shrink:0">\u00A5</span><span class="label" style="margin-left:4px">' + t("balance") + ' --</span>';
   setupHover(bal);
   bar.appendChild(bal);
 
   var toggleBtn = document.createElement("button");
   toggleBtn.id = "dshp-btn-toggle";
-  toggleBtn.title = "DSH 后端控制台";
+  toggleBtn.title = t("dshBackend") + " " + t("console");
   toggleBtn.style.cssText = btnStyle + ";font-weight:500";
-  toggleBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg><span style="margin-left:4px">控制台</span>';
+  toggleBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg><span style="margin-left:4px">' + t("console") + '</span>';
   setupHover(toggleBtn);
   bar.appendChild(toggleBtn);
 
@@ -363,36 +378,36 @@
   panel.id = "dshp-panel";
   panel.innerHTML =
     '<div id="dshp-head">' +
-    '  <div class="title"><span class="dot" id="dshp-title-dot"></span><span>DSH 后端控制台</span></div>' +
+    '  <div class="title"><span class="dot" id="dshp-title-dot"></span><span>' + t("console") + '</span></div>' +
     '  <span class="state" id="dshp-state">-</span>' +
     '  <div class="spacer"></div>' +
-    '  <button id="dshp-refresh-all" title="刷新全部">⟳</button>' +
-    '  <button id="dshp-close" title="关闭">✕</button>' +
+    '  <button id="dshp-refresh-all" title="Refresh">&#x27F3;</button>' +
+    '  <button id="dshp-close" title="' + t("close") + '">&times;</button>' +
     '</div>' +
     '<div id="dshp-tabs">' +
-    '  <button class="tab active" data-tab="logs"><span data-i18n="logs">日志</span></button>' +
-    '  <button class="tab" data-tab="ops"><span data-i18n="ops">操作</span></button>' +
-    '  <button class="tab" data-tab="settings"><span data-i18n="settings">设置</span></button>' +
+    '  <button class="tab active" data-tab="logs">' + t("logs") + '</button>' +
+    '  <button class="tab" data-tab="ops">' + t("ops") + '</button>' +
+    '  <button class="tab" data-tab="settings">' + t("settings") + '</button>' +
     '</div>' +
     '<div id="dshp-body">' +
     '  <div class="dshp-tab-pane active" data-pane="logs">' +
     '    <div id="dshp-logs-toolbar">' +
-    '      <span class="label">实时日志流（<span id="dshp-log-count">0</span> 条）</span>' +
+    '      <span class="label">' + t("realtimeLog") + '（<span id="dshp-log-count">0</span> ' + t("items") + '）</span>' +
     '      <div class="spacer"></div>' +
-    '      <button id="a-logs-export" title="导出当前日志到 .txt">导出</button>' +
-    '      <button id="a-logs-clear" title="清空日志视图">清空</button>' +
-    '      <button id="a-logs-pause" title="暂停/恢复自动滚动">暂停</button>' +
+    '      <button id="a-logs-export" title="' + t("export") + '">' + t("export") + '</button>' +
+    '      <button id="a-logs-clear" title="' + t("clear") + '">' + t("clear") + '</button>' +
+    '      <button id="a-logs-pause" title="' + t("pause") + '/' + t("resume") + '">' + t("pause") + '</button>' +
     '    </div>' +
     '    <div id="dshp-logs"></div>' +
     '  </div>' +
     '  <div class="dshp-tab-pane" data-pane="ops">' +
     '    <div id="dshp-kv">' +
-    '      <dt>状态</dt><dd id="kv-state">-</dd>' +
-    '      <dt>PID</dt><dd id="kv-pid">-</dd>' +
-    '      <dt>端口</dt><dd id="kv-port">-</dd>' +
-    '      <dt>版本</dt><dd id="kv-ver">-</dd>' +
+    '      <dt>' + t("status") + '</dt><dd id="kv-state">-</dd>' +
+    '      <dt>' + t("pid") + '</dt><dd id="kv-pid">-</dd>' +
+    '      <dt>' + t("port") + '</dt><dd id="kv-port">-</dd>' +
+    '      <dt>' + t("version") + '</dt><dd id="kv-ver">-</dd>' +
     '      <dt>DSH_HOME</dt><dd id="kv-home">-</dd>' +
-    '      <dt>余额</dt><dd id="kv-bal">-</dd>' +
+    '      <dt>' + t("balance") + '</dt><dd id="kv-bal">-</dd>' +
     '    </div>' +
     '    <div id="dshp-actions">' +
     '      <button id="a-health">' + t('healthCheck') + '</button>' +
@@ -400,20 +415,20 @@
     '      <button id="a-update-check">' + t('checkUpdate') + '</button>' +
     '      <button id="a-update-apply" class="primary" disabled>' + t('updateTo') + '</button>' +
     '    </div>' +
-    '    <div id="dshp-tip">健康检查=端口通+服务能应答；重启会自动恢复；导出日志见"日志"标签。</div>' +
+    '    <div id="dshp-tip">' + t("healthTip") + '</div>' +
     '  </div>' +
     '  <div class="dshp-tab-pane" data-pane="settings">' +
     '    <div>' +
-    '      <div style="font-size:12px;color:var(--dshp-fg-dim);margin-bottom:6px">账户 Provider（自动发现，可手动覆盖）</div>' +
+    '      <div style="font-size:12px;color:var(--dshp-fg-dim);margin-bottom:6px">Provider</div>' +
     '      <div style="display:flex;gap:6px">' +
     '        <select id="a-provider-select" style="flex:1;background:var(--dshp-code-bg);color:var(--dshp-fg);border:1px solid var(--dshp-border-strong);border-radius:7px;padding:6px 10px;font:13px/1 inherit">' +
-    '          <option value="">自动发现…</option>' +
-    '          <option value="deepseek-official">DeepSeek（官方）</option>' +
+    '          <option value="">Auto</option>' +
+    '          <option value="deepseek-official">DeepSeek</option>' +
     '        </select>' +
-    '        <button id="a-provider-apply">应用</button>' +
+    '        <button id="a-provider-apply">Apply</button>' +
     '      </div>' +
     '    </div>' +
-    '    <div id="dshp-tip">余额与 provider 均由 DSH 自动发现；如需手动覆盖请选择 Provider 并点击应用。</div>' +
+    '    <div id="dshp-tip">' + t("settingsTip") + '</div>' +
     '  </div>' +
     '</div>';
   document.body.appendChild(panel);
@@ -426,7 +441,7 @@
   var state = { provider: null, providerManual: false, latest: null, logsCursor: 0, logsBuffer: [], logPaused: false, dshReady: false };
 
   function showErr(msg) {
-    errBox.textContent = "壳连接错误: " + msg;
+    errBox.textContent = t("shellError") + msg;
     errBox.style.display = "block";
     clearTimeout(errBox._t);
     errBox._t = setTimeout(function () { errBox.style.display = "none"; }, 8000);
@@ -489,8 +504,8 @@
       if (total != null && total !== "") {
         var cur = q.currency ? q.currency + " " : "";
         setBal(cur + total, t('total') + ' ' + cur + total +
-          (q.granted_balance != null ?  + ' · ' + t('granted') + ' ' + q.granted_balance : "") +
-          (q.topped_up_balance != null ?  + ' · ' + t('topped') + ' ' + q.topped_up_balance : ""));
+          (q.granted_balance != null ? ' · ' + t('granted') + ' ' + q.granted_balance : "") +
+          (q.topped_up_balance != null ? ' · ' + t('topped') + ' ' + q.topped_up_balance : ""));
       } else {
         setBal("--", t("noData"));
       }
@@ -537,12 +552,12 @@
       var filename = "dsh-portable-logs-" + new Date().toISOString().replace(/[:.]/g, "-") + ".txt";
       var handle = await window.showSaveFilePicker({
         suggestedName: filename,
-        types: [{ description: "文本文件", accept: { "text/plain": [".txt"] } }]
+        types: [{ description: t("textFile"), accept: { "text/plain": [".txt"] } }]
       });
       var writable = await handle.createWritable();
       await writable.write(content);
       await writable.close();
-      setTip(t("exported") + state.logsBuffer.length + " + t("items") + "日志");
+      setTip(t("exported") + state.logsBuffer.length + " " + t("items"));
     } catch (e) {
       if (e.name !== "AbortError") setTip(t("exportFailed") + e.message);
     }
@@ -602,7 +617,7 @@
     } else if ((el = findEl(e, "a-health"))) {
       setTip(t("healthRunning"));
       api("/api/shell/health").then(function (h) {
-        setTip(t('healthResult') + (h.tcp_ok ? "✓" : "✗") +  + t('serviceReply') + ' + (h.handshake_ok ? "✓" : "✗") + " · 耗时 " + h.latency_ms + "ms (" + h.detail + ")");
+        setTip(t('healthResult') + (h.tcp_ok ? "✓" : "✗") + t('serviceReply') + (h.handshake_ok ? "✓" : "✗") + " · " + h.latency_ms + "ms (" + h.detail + ")");
       }).catch(function (err) { setTip(t("healthFailed") + err); });
     } else if ((el = findEl(e, "a-restart"))) {
       if (!confirm(t("confirmRestart"))) return;
@@ -621,7 +636,7 @@
       }).catch(function (err) { setTip(t("checkFailed") + err); });
     } else if ((el = findEl(e, "a-update-apply"))) {
       if (!state.latest) return;
-      if (!confirm(t('confirmUpdate') + state.latest +  + t('updateNote'))) return;
+      if (!confirm(t('confirmUpdate') + state.latest + t('updateNote'))) return;
       setTip(t('updateWaiting'));
     } else if ((el = findEl(e, "a-provider-apply"))) {
       var sel = $("a-provider-select");
@@ -639,6 +654,109 @@
   setInterval(refreshBalance, 600000);
   setInterval(pollLogs, 1200);
   setInterval(discoverProvider, 30000);
+
+  // 语言变化检测：定期检查设置，变化时更新 UI 文字（不刷新页面）
+  function checkLang() {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", BASE + "/api/shell/settings", true);
+      xhr.timeout = 2000;
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          try {
+            var s = JSON.parse(xhr.responseText);
+            if (s && s.locale && s.locale !== lang) {
+              lang = s.locale;
+              updateUI();
+              refreshBalance(); // 余额文字需要重新获取
+            }
+          } catch (e) {}
+        }
+      };
+      xhr.send();
+    } catch (e) {}
+  }
+  function updateUI() {
+    // 菜单按钮
+    var editBtn = menusDiv.querySelector('[data-menu="edit"]');
+    var helpBtn = menusDiv.querySelector('[data-menu="help"]');
+    if (editBtn) editBtn.textContent = t("edit");
+    if (helpBtn) helpBtn.textContent = t("help");
+    // 编辑下拉菜单项
+    if (editMenu) {
+      var editLabels = [t("undo"), t("redo"), null, t("cut"), t("copy"), t("paste")];
+      var editDdItems = editMenu.dd.querySelectorAll(".dshp-dropdown-item");
+      var idx = 0;
+      for (var ei = 0; ei < editDdItems.length && idx < editLabels.length; idx++) {
+        if (editLabels[idx] === null) { idx++; }
+        var span = editDdItems[ei].querySelector("span:first-child");
+        if (span) span.textContent = editLabels[idx];
+        ei++;
+      }
+    }
+    // 帮助下拉菜单项
+    if (helpMenu) {
+      var helpLabels = [t("devtools"), null, t("viewGithub"), t("docs"), t("plugins"), t("cordis")];
+      var helpDdItems = helpMenu.dd.querySelectorAll(".dshp-dropdown-item");
+      var hi = 0;
+      for (var hj = 0; hj < helpDdItems.length && hi < helpLabels.length; hi++) {
+        if (helpLabels[hi] === null) { hi++; }
+        var hspan = helpDdItems[hj].querySelector("span:first-child");
+        if (hspan) hspan.textContent = helpLabels[hi];
+        hj++;
+      }
+    }
+    // 窗口控制标题
+    btnMin.title = t("min");
+    btnMax.title = t("max");
+    btnClose.title = t("close");
+    // 余额按钮
+    if (bal) bal.title = t('balance') + ' — ' + (lang === 'zh' ? '点击刷新' : 'Click to refresh');
+    // 控制台按钮
+    if (toggleBtn) {
+      toggleBtn.title = t("dshBackend") + " " + t("console");
+      var conSpan = toggleBtn.querySelector("span");
+      if (conSpan) conSpan.textContent = t("console");
+    }
+    // 面板 Tab
+    var tabs = panel ? panel.querySelectorAll(".tab") : [];
+    if (tabs.length >= 3) {
+      tabs[0].textContent = t("logs");
+      tabs[1].textContent = t("ops");
+      tabs[2].textContent = t("settings");
+    }
+    // 面板标题
+    var headTitle = panel ? panel.querySelector("#dshp-head .title span:last-child") : null;
+    if (headTitle) headTitle.textContent = t("console");
+    // 面板内 KV 标签
+    var kvLabels = panel ? panel.querySelectorAll("#dshp-kv dt") : [];
+    var kvKeys = ["status", "pid", "port", "version", null, "balance"];
+    for (var i = 0; i < kvLabels.length && i < kvKeys.length; i++) {
+      if (kvKeys[i]) kvLabels[i].textContent = t(kvKeys[i]);
+    }
+    // 操作区按钮
+    var btns = panel ? panel.querySelectorAll("#dshp-actions button") : [];
+    var btnKeys = ["healthCheck", "restart", "checkUpdate", "updateTo"];
+    for (var j = 0; j < btns.length && j < btnKeys.length; j++) {
+      btns[j].textContent = t(btnKeys[j]);
+    }
+    // 提示文本
+    var tips = panel ? panel.querySelectorAll("#dshp-tip") : [];
+    if (tips.length > 0) tips[0].textContent = t("healthTip");
+    if (tips.length > 1) tips[1].textContent = t("settingsTip");
+    // 日志工具栏
+    var logLabel = panel ? panel.querySelector("#dshp-logs-toolbar .label") : null;
+    if (logLabel) logLabel.innerHTML = t("realtimeLog") + '（<span id="dshp-log-count">0</span> ' + t("items") + '）';
+    var logBtns = panel ? panel.querySelectorAll("#dshp-logs-toolbar button") : [];
+    if (logBtns.length >= 3) {
+      logBtns[0].textContent = t("export");
+      logBtns[0].title = t("export");
+      logBtns[1].textContent = t("clear");
+      logBtns[1].title = t("clear");
+      logBtns[2].textContent = state.logPaused ? t("resume") : t("pause");
+    }
+  }
+  setInterval(checkLang, 5000);
 
   // 抗 dsh 路由变化（history.pushState 切换会卸载当前组件树，可能影响注入 UI）
   window.addEventListener("popstate", function () {

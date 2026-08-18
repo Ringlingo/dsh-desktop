@@ -85,7 +85,7 @@ pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event_id: &str) {
             }
         }
         "github" => {
-            let _ = open::that("https://github.com/Ringlingo/deepseek-harness");
+            let _ = open::that("https://github.com/deepseek-ai/deepseek-harness");
         }
         "docs" => {
             let _ = open::that("https://deepseek-harness.github.io/deepseek-harness/guide/quickstart");
