@@ -2,9 +2,13 @@
   <img src="assets/favicon.svg" alt="DSH Desktop" width="182">
 </p>
 
-<h3 align="center">DeepSeek Harness 桌面版</h3>
+<h3 align="center">DeepSeek Harness Desktop</h3>
 
-<p align="center">双击即用的 AI Agent 工作台 — 基于 [DeepSeek Harness](https://github.com/Ringlingo/deepseek-harness) 的便携桌面客户端</p>
+<p align="center">
+  <b>中文</b> · <a href="#english">English</a>
+</p>
+
+<p align="center">双击即用的 AI Agent 工作台 — 基于 <a href="https://github.com/Ringlingo/deepseek-harness">DeepSeek Harness</a> 的便携桌面客户端</p>
 
 <p align="center">
   <a href="#下载">下载</a> ·
@@ -128,8 +132,6 @@ dsh-desktop/
 
 ## 质量红线
 
-以下规则不可突破：
-
 | # | 红线 |
 |---|------|
 | R1 | WebView 必须加载 `http://127.0.0.1:PORT` 同源 URL |
@@ -151,5 +153,163 @@ dsh-desktop/
 - [Tauri](https://tauri.app/) — 桌面应用框架
 
 ## 许可证
+
+[MIT](LICENSE)
+
+---
+
+<a id="english"></a>
+
+# DSH Desktop
+
+<p align="center">
+  <b>English</b> · <a href="#">中文</a>
+</p>
+
+<p align="center">A portable desktop client for <a href="https://github.com/Ringlingo/deepseek-harness">DeepSeek Harness</a> — double-click to launch your AI Agent workspace</p>
+
+<p align="center">
+  <a href="#download">Download</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="#build-from-source">Build</a> ·
+  <a href="#directory-structure">Structure</a>
+</p>
+
+---
+
+## Download
+
+Download the latest `dsh-desktop-vX.X.X.zip` from [GitHub Releases](../../releases), extract, and double-click `dsh-desktop.exe`.
+
+No Node.js installation, no environment setup — zero dependencies out of the box.
+
+## Screenshots
+
+| Loading | Main UI | Help Menu | Debug Console |
+|:---:|:---:|:---:|:---:|
+| ![Loading](images/0.png) | ![Main UI](images/1.png) | ![Help](images/2.png) | ![Console](images/3.png) |
+
+## Features
+
+### Core Experience
+
+- **Zero-config launch** — Embedded Node.js + DSH runtime, no dependencies to install
+- **Portable deployment** — Copy the entire directory to any Windows machine, data travels with it
+- **Auto-start** — Double-click the exe to launch DSH backend and enter the workspace
+
+### Title Bar & Menus
+
+- **Custom title bar** — Whale icon + Edit/Help dropdowns + balance display + console entry
+- **Edit menu** — Undo, Redo, Cut, Copy, Paste (Ctrl shortcuts)
+- **Help menu** — DevTools, GitHub, docs, community plugins, Cordis paper
+- **Window controls** — Minimize, maximize, close (drag title bar to move)
+
+### Backend Management
+
+- **Real-time logs** — Console panel streams backend stdout/stderr with export/clear/pause
+- **Health check** — One-click port connectivity + service handshake probe
+- **Process info** — PID, memory, version, runtime path
+- **One-click restart** — Quick recovery when backend fails
+
+### Data & Security
+
+- **Data isolation** — All data stored in `data/` directory, never pollutes user home
+- **DSH_HOME** — Environment variable injection, no fallback to `~/.dsh`
+- **Portable migration** — Copy directory to new machine, sessions/config/keys transfer seamlessly
+
+### Theme Adaptation
+
+- **Theme following** — Title bar auto-adapts to DSH dark/light theme
+- **Icon adaptation** — Black icon in light mode, auto-inverts to white in dark mode
+
+## System Requirements
+
+- **OS**: Windows 10 1809+ / Windows 11 x64
+- **WebView2 Runtime**: Pre-installed on Windows 10 1809+, no extra install needed
+
+## Build from Source
+
+### Prerequisites
+
+- [Rust](https://rustup.rs) 1.77+
+- [pnpm](https://pnpm.io/) (for downloading runtime)
+- DeepSeek Harness runtime (node.exe + dsh)
+
+### Steps
+
+```powershell
+# 1. Clone the repo
+git clone https://github.com/Ringlingo/dsh-desktop.git
+cd dsh-desktop
+
+# 2. Prepare runtime (from dsh-portable or npm)
+# runtime/node/node.exe — Node.js binary
+# runtime/dsh/ — DSH core (@deepseek-ai/dsh + dependencies)
+
+# 3. Build exe
+cd src-tauri
+cargo build --release
+
+# 4. Run build script (assemble full package)
+cd ..
+.\scripts\build-release.ps1
+```
+
+Output is in the `release/dsh-desktop/` directory.
+
+## Directory Structure
+
+```
+dsh-desktop/
+├── dsh-desktop.exe       # Application (~20 MB)
+├── ui/
+│   └── index.html        # Splash loading page
+├── runtime/
+│   ├── node/node.exe     # Node.js runtime (83 MB)
+│   └── dsh/              # DSH core (255 MB)
+│       └── node_modules/@deepseek-ai/dsh/
+└── data/                 # User data (auto-created on first run)
+    ├── profiles/         # Plugin config
+    ├── sessions/         # Session data
+    ├── storages/         # Workspace cache
+    ├── settings.yaml     # App settings
+    └── .credentials.yaml # API credentials
+```
+
+**Full package size**: ~264 MB (with runtime)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Shell | [Tauri 2](https://tauri.app/) (Rust) |
+| Frontend | HTML/CSS/JS injection (based on DSH Web UI) |
+| Backend | [DeepSeek Harness](https://github.com/Ringlingo/deepseek-harness) (Node.js + Cordis) |
+| Runtime | Node.js 22.19+ |
+
+## Quality Red Lines
+
+| # | Rule |
+|---|------|
+| R1 | WebView must load `http://127.0.0.1:PORT` same-origin URL |
+| R2 | DSH_HOME must point to `data/`, no fallback to `~/.dsh` |
+| R3 | Exit must kill the entire child process tree |
+| R4 | Version from package.json, never `host.describe().version` |
+| R5 | Updates require SHA256 verification + atomic replacement + rollback |
+| R6 | Update process must not block the UI |
+| R7 | Logs must not output sensitive information |
+| R8 | Single instance, no duplicate backend launches |
+| R9 | No bare crashes, unified error UI |
+| R10 | Startup ready-line parsing must be strict |
+| R11 | Balance credentials only used in HTTPS request headers |
+
+## Related Projects
+
+- [DeepSeek Harness](https://github.com/Ringlingo/deepseek-harness) — Agent tool core
+- [Cordis](https://github.com/cordiverse/cordis) — Plugin framework
+- [Tauri](https://tauri.app/) — Desktop app framework
+
+## License
 
 [MIT](LICENSE)
