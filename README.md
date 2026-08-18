@@ -45,7 +45,7 @@
 - **自定义标题栏** — 鲸鱼图标 + 编辑/帮助下拉菜单 + 余额显示 + 控制台入口
 - **编辑菜单** — 撤销、恢复、剪切、复制、粘贴（Ctrl 快捷键）
 - **帮助菜单** — 开发者工具、GitHub、文档、社区插件、Cordis 论文
-- **窗口控制** — 最小化、最大化、关闭（拖拽标题栏移动窗口）
+- **窗口控制** — 最小化、最大化、关闭（拖拽标题栏移动窗口，点关闭最小化到系统托盘而非退出）
 
 ### 后端管理
 
@@ -203,7 +203,7 @@ No Node.js installation, no environment setup — zero dependencies out of the b
 - **Custom title bar** — Whale icon + Edit/Help dropdowns + balance display + console entry
 - **Edit menu** — Undo, Redo, Cut, Copy, Paste (Ctrl shortcuts)
 - **Help menu** — DevTools, GitHub, docs, community plugins, Cordis paper
-- **Window controls** — Minimize, maximize, close (drag title bar to move)
+- **Window controls** — Minimize, maximize, close (drag title bar to move; clicking close minimizes to system tray instead of quitting)
 
 ### Backend Management
 
