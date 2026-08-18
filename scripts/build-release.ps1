@@ -55,8 +55,59 @@ Copy-Item "$SourceDir\runtime\dsh\*" "$ReleaseDir\runtime\dsh\" -Recurse -Force
 $dshSize = (Get-ChildItem "$ReleaseDir\runtime\dsh" -Recurse -File | Measure-Object -Property Length -Sum).Sum
 Write-Host " ($([math]::Round($dshSize/1MB, 1)) MB)"
 
-# 6. 创建空 data 结构
-Write-Host "`n[6/6] 创建 data 目录结构..." -ForegroundColor Yellow
+# 6. 精简：删除不影响运行的文件（保留插件完整性）
+Write-Host "`n[6/8] 精简 runtime..." -ForegroundColor Yellow
+$NmDir = "$ReleaseDir\runtime\dsh\node_modules"
+$removedSize = 0
+
+# ARM64 二进制（x64 不需要）
+@(
+    "$NmDir\node-pty\prebuilds\win32-arm64",
+    "$NmDir\@img\sharp-wasm32",
+    "$NmDir\@koromix\koffi-win32-arm64"
+) | ForEach-Object {
+    if (Test-Path $_) {
+        $s = (Get-ChildItem $_ -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+        Remove-Item $_ -Recurse -Force
+        $removedSize += $s
+    }
+}
+
+# Source maps（.map 文件，运行时不需要）
+$maps = Get-ChildItem $NmDir -Recurse -Include "*.map" -File -ErrorAction SilentlyContinue
+$mapSize = ($maps | Measure-Object -Property Length -Sum).Sum
+$maps | Remove-Item -Force
+$removedSize += $mapSize
+
+# 测试/示例/基准目录
+@("test","tests","__tests__","spec","example","examples","benchmark","benchmarks","__mocks__","fixtures","__fixtures__") | ForEach-Object {
+    $dirs = Get-ChildItem $NmDir -Recurse -Directory -Filter $_ -ErrorAction SilentlyContinue
+    foreach ($d in $dirs) {
+        # 只删 node_modules 内的，不删顶层
+        if ($d.FullName -match "node_modules\\.+\\node_modules\\" -or $d.FullName -match "node_modules\\[^\\]+\\(test|tests|__tests__|spec|example|examples|benchmark|benchmarks|__mocks__|fixtures|__fixtures__)") {
+            $s = (Get-ChildItem $d.FullName -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+            Remove-Item $d.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            $removedSize += $s
+        }
+    }
+}
+
+# 文档文件（README/CHANGELOG/HISTORY 等，保留 LICENSE）
+Get-ChildItem $NmDir -Recurse -Include "README*","CHANGELOG*","HISTORY*","CHANGES*","CONTRIBUTING*","AUTHORS*","HACKING*","SECURITY*","UPGRADING*","MIGRATION*",".npmignore",".gitignore",".editorconfig",".eslintrc*",".prettierrc*","tsconfig*.json","jest.config*","vitest.config*","webpack.config*","rollup.config*","vite.config*",".babelrc*","babel.config*","Makefile","Gruntfile*","Gulpfile*","*.coffee","*.litcoffee","*.tsbuildinfo" -File -ErrorAction SilentlyContinue | ForEach-Object {
+    $removedSize += $_.Length
+    Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue
+}
+
+# TypeScript 源码（只删 node_modules 内的 .ts 文件，保留 .d.ts 类型声明）
+Get-ChildItem $NmDir -Recurse -Include "*.ts" -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".ts" -and $_.FullName -notmatch "\.d\.ts$" -and $_.FullName -match "node_modules" } | ForEach-Object {
+    $removedSize += $_.Length
+    Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue
+}
+
+Write-Host "  精简: $([math]::Round($removedSize/1MB, 1)) MB"
+
+# 7. 创建空 data 结构
+Write-Host "`n[7/8] 创建 data 目录结构..." -ForegroundColor Yellow
 @("profiles", "sessions", "storages", "logs") | ForEach-Object {
     New-Item -Path "$ReleaseDir\data\$_" -ItemType Directory -Force | Out-Null
 }
@@ -69,9 +120,9 @@ Write-Host "`n=== 构建完成 ===" -ForegroundColor Green
 Write-Host "输出: $ReleaseDir"
 Write-Host "大小: $([math]::Round($TotalSize/1MB, 1)) MB ($FileCount files)"
 
-# 打包 zip
+# 8. 打包 zip
 $ZipPath = "$Root\release\dsh-desktop-v$Version.zip"
-Write-Host "`n打包: $ZipPath" -ForegroundColor Yellow
+Write-Host "`n[8/8] 打包: $ZipPath" -ForegroundColor Yellow
 Compress-Archive -Path $ReleaseDir -DestinationPath $ZipPath -Force
 $ZipSize = (Get-Item $ZipPath).Length
 Write-Host "完成: $([math]::Round($ZipSize/1MB, 1)) MB" -ForegroundColor Green
