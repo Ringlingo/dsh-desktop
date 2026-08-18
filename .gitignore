@@ -1,0 +1,28 @@
+# Build outputs
+src-tauri/target/
+src-tauri/gen/
+
+# Runtime (downloaded separately)
+runtime/
+
+# Release output
+release/
+
+# User data (portable, never commit)
+data/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Backup files
+*.bak
+*.tmp
