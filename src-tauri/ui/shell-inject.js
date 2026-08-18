@@ -11,6 +11,62 @@
   var PORT = window.DSH_SHELL_PORT || parseInt(sessionStorage.getItem("DSH_SHELL_PORT") || "0", 10) || 47563;
   var BASE = "http://127.0.0.1:" + PORT;
 
+  // ---------- i18n ----------
+  var lang = (navigator.language || "zh").startsWith("zh") ? "zh" : "en";
+  var i18n = {
+    zh: {
+      edit: "编辑(E)", help: "帮助(H)",
+      undo: "撤销", redo: "恢复", cut: "剪切", copy: "复制", paste: "粘贴",
+      devtools: "切换开发人员工具", viewGithub: "查看 GitHub", docs: "开发者文档", plugins: "社区插件", cordis: "Cordis 论文",
+      min: "最小化", max: "最大化", close: "关闭",
+      balance: "余额", console: "控制台",
+      noData: t("noData"), queryFail: t("queryFail"),
+      total: "总额", granted: "赠送", topped: "充值",
+      dshBackend: "DSH 后端", port: "端口", disconnected: "未连接",
+      logs: "日志", ops: "操作", settings: "设置",
+      realtimeLog: "实时日志流", items: "条", export: "导出", clear: "清空", pause: "暂停", resume: "恢复",
+      status: "状态", pid: "PID", version: "版本",
+      healthCheck: "健康检查", restart: "重启后端", checkUpdate: "检查更新", updateTo: "更新到最新版",
+      healthTip: t('healthTip'),
+      noLogs: t("noLogs"), exported: t("exported"), exportFailed: t("exportFailed"), logCleared: t("logCleared"),
+      healthRunning: t("healthRunning"), healthResult: t('healthResult'), serviceReply:  + t('serviceReply') + ',
+      healthFailed: t("healthFailed"), confirmRestart: t("confirmRestart"),
+      restarting: t("restarting"), restarted: t('restarted'), restartFailed: t("restartFailed"),
+      checkingUpdate: t("checkingUpdate"), checkFailed: t("checkFailed"), newVersion: t('newVersion'), latest: t('latest'),
+      confirmUpdate: t('confirmUpdate'), updateNote:  + t('updateNote'),
+      updateWaiting: t('updateWaiting'),
+      selectProvider: t("selectProvider"),
+      injectError: t('injectError'),
+      textFile: "文本文件"
+    },
+    en: {
+      edit: "Edit(E)", help: "Help(H)",
+      undo: "Undo", redo: "Redo", cut: "Cut", copy: "Copy", paste: "Paste",
+      devtools: "Toggle DevTools", viewGithub: "View GitHub", docs: "Developer Docs", plugins: "Community Plugins", cordis: "Cordis Paper",
+      min: "Minimize", max: "Maximize", close: "Close",
+      balance: "Balance", console: "Console",
+      noData: "No data (click to retry)", queryFailed: "Query failed: ",
+      total: "Total", granted: "Granted", topped: "Topped up",
+      dshBackend: "DSH Backend", port: "Port", disconnected: "Disconnected",
+      logs: "Logs", ops: "Operations", settings: "Settings",
+      realtimeLog: "Real-time log stream", items: "", export: "Export", clear: "Clear", pause: "Pause", resume: "Resume",
+      status: "Status", pid: "PID", version: "Version",
+      healthCheck: "Health Check", restart: "Restart Backend", checkUpdate: "Check Update", updateTo: "Update to Latest",
+      healthTip: "Health check = port reachable + service responds; restart auto-recovers; see "Logs" tab to export.",
+      noLogs: "No logs to export", exported: "Exported ", exportFailed: "Export failed: ", logCleared: "Log view cleared",
+      healthRunning: "Running health check…", healthResult: "Health check: port ", serviceReply: " · service ",
+      healthFailed: "Health check failed: ", confirmRestart: "Restart DSH backend? Current session will be interrupted.",
+      restarting: "Restarting backend…", restarted: "Backend restarted, port ", restartFailed: "Restart failed: ",
+      checkingUpdate: "Checking updates…", checkFailed: "Check failed: ", newVersion: "New version found: ", latest: "Already up to date",
+      confirmUpdate: "Update to ", updateNote: "? Update package requires M5 pipeline.",
+      updateWaiting: "Update: waiting for pipeline download URL…",
+      selectProvider: "Please select a provider first",
+      injectError: "Injection error: ",
+      textFile: "Text file"
+    }
+  };
+  function t(key) { return (i18n[lang] && i18n[lang][key]) || i18n.zh[key] || key; }
+
   function api(path, payload, method) {
     return fetch(BASE + path, {
       method: method || "POST",
@@ -26,7 +82,7 @@
     try {
       var d = document.createElement("div");
       d.style.cssText = "position:fixed;bottom:8px;right:8px;background:#fee;color:#c00;padding:8px 12px;border-radius:6px;z-index:2147483603;font:12px/1.4 monospace;max-width:60%";
-      d.textContent = "注入错误: " + (e.message || "?");
+      d.textContent = t("injectError") + (e.message || "?");
       document.body.appendChild(d);
     } catch (x) {}
   });
@@ -156,17 +212,17 @@
     return { btn: btn, dd: dd };
   }
 
-  var editMenu = createMenuBtn("编辑(E)", "edit");
-  var helpMenu = createMenuBtn("帮助(H)", "help");
+  var editMenu = createMenuBtn(t("edit"), "edit");
+  var helpMenu = createMenuBtn(t("help"), "help");
 
   // 编辑下拉菜单内容
   var editItems = [
-    { label: "撤销", shortcut: "Ctrl+Z", action: function () { doEdit("undo"); } },
-    { label: "恢复", shortcut: "Ctrl+Y", action: function () { doEdit("redo"); } },
+    { label: t("undo"), shortcut: "Ctrl+Z", action: function () { doEdit("undo"); } },
+    { label: t("redo"), shortcut: "Ctrl+Y", action: function () { doEdit("redo"); } },
     null, // separator
-    { label: "剪切", shortcut: "Ctrl+X", action: function () { doEdit("cut"); } },
-    { label: "复制", shortcut: "Ctrl+C", action: function () { doEdit("copy"); } },
-    { label: "粘贴", shortcut: "Ctrl+V", action: function () { doEdit("paste"); } }
+    { label: t("cut"), shortcut: "Ctrl+X", action: function () { doEdit("cut"); } },
+    { label: t("copy"), shortcut: "Ctrl+C", action: function () { doEdit("copy"); } },
+    { label: t("paste"), shortcut: "Ctrl+V", action: function () { doEdit("paste"); } }
   ];
   editItems.forEach(function (item) {
     if (!item) {
@@ -184,12 +240,12 @@
 
   // 帮助下拉菜单内容
   var helpItems = [
-    { label: "切换开发人员工具", shortcut: "Ctrl+Shift+I", action: function () { api("/api/shell/devtools", { enabled: true }); } },
+    { label: t("devtools"), shortcut: "Ctrl+Shift+I", action: function () { api("/api/shell/devtools", { enabled: true }); } },
     null,
-    { label: "查看 GitHub", action: function () { api("/api/shell/open-external", { url: "https://github.com/Ringlingo/deepseek-harness" }); } },
-    { label: "开发者文档", action: function () { api("/api/shell/open-external", { url: "https://deepseek-harness.github.io/deepseek-harness/guide/quickstart" }); } },
-    { label: "社区插件", action: function () { api("/api/shell/open-external", { url: "https://github.com/topics/dsh-plugin" }); } },
-    { label: "Cordis 论文", action: function () { api("/api/shell/open-external", { url: "https://github.com/cordiverse/paper" }); } }
+    { label: t("viewGithub"), action: function () { api("/api/shell/open-external", { url: "https://github.com/deepseek-ai/deepseek-harness" }); } },
+    { label: t("docs"), action: function () { api("/api/shell/open-external", { url: "https://deepseek-harness.github.io/deepseek-harness/guide/quickstart" }); } },
+    { label: t("plugins"), action: function () { api("/api/shell/open-external", { url: "https://github.com/topics/dsh-plugin" }); } },
+    { label: t("cordis"), action: function () { api("/api/shell/open-external", { url: "https://github.com/cordiverse/paper" }); } }
   ];
   helpItems.forEach(function (item) {
     if (!item) {
@@ -242,21 +298,21 @@
   var btnMin = document.createElement("button");
   btnMin.className = "tb-winbtn";
   btnMin.innerHTML = '<svg viewBox="0 0 10 10"><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.2"/></svg>';
-  btnMin.title = "最小化";
+  btnMin.title = t("min");
   btnMin.addEventListener("click", function () { api("/api/shell/window/minimize"); });
   winBtns.appendChild(btnMin);
 
   var btnMax = document.createElement("button");
   btnMax.className = "tb-winbtn";
   btnMax.innerHTML = '<svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>';
-  btnMax.title = "最大化";
+  btnMax.title = t("max");
   btnMax.addEventListener("click", function () { api("/api/shell/window/toggle-maximize"); });
   winBtns.appendChild(btnMax);
 
   var btnClose = document.createElement("button");
   btnClose.className = "tb-winbtn close";
   btnClose.innerHTML = '<svg viewBox="0 0 10 10"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.2"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.2"/></svg>';
-  btnClose.title = "关闭";
+  btnClose.title = t("close");
   btnClose.addEventListener("click", function () { api("/api/shell/window/close"); });
   winBtns.appendChild(btnClose);
 
@@ -288,7 +344,7 @@
 
   var bal = document.createElement("button");
   bal.id = "dshp-bal";
-  bal.title = "账户余额 — 点击刷新";
+  bal.title = t('balance') + ' — ' + (lang === 'zh' ? '点击刷新' : 'Click to refresh');
   bal.style.cssText = btnStyle + ";min-width:80px;font-size:12.5px";
   bal.innerHTML = '<span style="font-size:14px;font-weight:600;line-height:1;flex-shrink:0">\u00A5</span><span class="label" style="margin-left:4px">余额 --</span>';
   setupHover(bal);
@@ -314,9 +370,9 @@
     '  <button id="dshp-close" title="关闭">✕</button>' +
     '</div>' +
     '<div id="dshp-tabs">' +
-    '  <button class="tab active" data-tab="logs">日志</button>' +
-    '  <button class="tab" data-tab="ops">操作</button>' +
-    '  <button class="tab" data-tab="settings">设置</button>' +
+    '  <button class="tab active" data-tab="logs"><span data-i18n="logs">日志</span></button>' +
+    '  <button class="tab" data-tab="ops"><span data-i18n="ops">操作</span></button>' +
+    '  <button class="tab" data-tab="settings"><span data-i18n="settings">设置</span></button>' +
     '</div>' +
     '<div id="dshp-body">' +
     '  <div class="dshp-tab-pane active" data-pane="logs">' +
@@ -339,10 +395,10 @@
     '      <dt>余额</dt><dd id="kv-bal">-</dd>' +
     '    </div>' +
     '    <div id="dshp-actions">' +
-    '      <button id="a-health">健康检查</button>' +
-    '      <button id="a-restart" class="danger">重启后端</button>' +
-    '      <button id="a-update-check">检查更新</button>' +
-    '      <button id="a-update-apply" class="primary" disabled>更新到最新版</button>' +
+    '      <button id="a-health">' + t('healthCheck') + '</button>' +
+    '      <button id="a-restart" class="danger">' + t('restart') + '</button>' +
+    '      <button id="a-update-check">' + t('checkUpdate') + '</button>' +
+    '      <button id="a-update-apply" class="primary" disabled>' + t('updateTo') + '</button>' +
     '    </div>' +
     '    <div id="dshp-tip">健康检查=端口通+服务能应答；重启会自动恢复；导出日志见"日志"标签。</div>' +
     '  </div>' +
@@ -390,7 +446,7 @@
       $("kv-ver").textContent = info.dsh_version || "-";
       $("kv-home").textContent = info.dsh_home || "-";
       $("dshp-title-dot").className = "dot " + (ready ? "running" : "");
-      bar.title = "DSH 后端 " + (info.state || "-") + (info.port ? " · 端口 " + info.port : "") + (info.dsh_version ? " · v" + info.dsh_version : "");
+      bar.title = t("dshBackend") + " " + (info.state || "-") + (info.port ? " · " + t("port") + " " + info.port : "") + (info.dsh_version ? " · v" + info.dsh_version : "");
       if (ready && !state.dshReady) {
         state.dshReady = true;
         discoverProvider();
@@ -398,7 +454,7 @@
       }
     }).catch(function () {
       $("dshp-title-dot").className = "dot";
-      bar.title = "DSH 后端未连接";
+      bar.title = t("disconnected");
       state.dshReady = false;
     });
   }
@@ -421,7 +477,7 @@
 
   // ---------- 余额 ----------
   function setBal(text, detail) {
-    $("dshp-bal").querySelector(".label").textContent = "余额 " + text;
+    $("dshp-bal").querySelector(".label").textContent = t("balance") + " " + text;
     if (detail !== undefined) $("kv-bal").textContent = detail;
   }
   function refreshBalance() {
@@ -432,13 +488,13 @@
       var total = q.total_balance;
       if (total != null && total !== "") {
         var cur = q.currency ? q.currency + " " : "";
-        setBal(cur + total, "总额 " + cur + total +
-          (q.granted_balance != null ? " · 赠送 " + q.granted_balance : "") +
-          (q.topped_up_balance != null ? " · 充值 " + q.topped_up_balance : ""));
+        setBal(cur + total, t('total') + ' ' + cur + total +
+          (q.granted_balance != null ?  + ' · ' + t('granted') + ' ' + q.granted_balance : "") +
+          (q.topped_up_balance != null ?  + ' · ' + t('topped') + ' ' + q.topped_up_balance : ""));
       } else {
-        setBal("--", "暂无数据（点击刷新重试）");
+        setBal("--", t("noData"));
       }
-    }).catch(function (e) { setBal("--", "查询失败: " + e); });
+    }).catch(function (e) { setBal("--", t("queryFail") + e); });
   }
 
   // ---------- 日志 ----------
@@ -472,7 +528,7 @@
     });
   }
   async function exportLogs() {
-    if (state.logsBuffer.length === 0) { setTip("暂无日志可导出"); return; }
+    if (state.logsBuffer.length === 0) { setTip(t("noLogs")); return; }
     var content = state.logsBuffer.map(function (L) {
       var ts = L.ts ? new Date(L.ts).toISOString() : "";
       return "[" + ts + "] [" + L.stream + "] " + L.line;
@@ -486,15 +542,15 @@
       var writable = await handle.createWritable();
       await writable.write(content);
       await writable.close();
-      setTip("已导出 " + state.logsBuffer.length + " 条日志");
+      setTip(t("exported") + state.logsBuffer.length + " + t("items") + "日志");
     } catch (e) {
-      if (e.name !== "AbortError") setTip("导出失败: " + e.message);
+      if (e.name !== "AbortError") setTip(t("exportFailed") + e.message);
     }
   }
-  function clearLogsView() { $("dshp-logs").innerHTML = ""; setTip("日志视图已清空"); }
+  function clearLogsView() { $("dshp-logs").innerHTML = ""; setTip(t("logCleared")); }
   function togglePauseLogs() {
     state.logPaused = !state.logPaused;
-    $("a-logs-pause").textContent = state.logPaused ? "恢复" : "暂停";
+    $("a-logs-pause").textContent = state.logPaused ? t('resume') : t('pause');
   }
 
   // ---------- 编辑操作支持 ----------
@@ -544,33 +600,33 @@
     } else if ((el = findEl(e, "a-logs-clear"))) { clearLogsView();
     } else if ((el = findEl(e, "a-logs-pause"))) { togglePauseLogs();
     } else if ((el = findEl(e, "a-health"))) {
-      setTip("正在健康检查…");
+      setTip(t("healthRunning"));
       api("/api/shell/health").then(function (h) {
-        setTip("健康检查：端口连通 " + (h.tcp_ok ? "✓" : "✗") + " · 服务应答 " + (h.handshake_ok ? "✓" : "✗") + " · 耗时 " + h.latency_ms + "ms (" + h.detail + ")");
-      }).catch(function (err) { setTip("健康检查失败: " + err); });
+        setTip(t('healthResult') + (h.tcp_ok ? "✓" : "✗") +  + t('serviceReply') + ' + (h.handshake_ok ? "✓" : "✗") + " · 耗时 " + h.latency_ms + "ms (" + h.detail + ")");
+      }).catch(function (err) { setTip(t("healthFailed") + err); });
     } else if ((el = findEl(e, "a-restart"))) {
-      if (!confirm("确定重启 DSH 后端？当前会话会中断。")) return;
-      setTip("正在重启后端…");
+      if (!confirm(t("confirmRestart"))) return;
+      setTip(t("restarting"));
       api("/api/shell/restart").then(function (r) {
-        if (r.ok) { setTip("后端已重启，端口 " + r.port); state.dshReady = false; setTimeout(refreshStatus, 800); setTimeout(discoverProvider, 1500); }
-        else { setTip("重启失败: " + (r.error || "")); }
-      }).catch(function (err) { setTip("重启失败: " + err); });
+        if (r.ok) { setTip(t('restarted') + r.port); state.dshReady = false; setTimeout(refreshStatus, 800); setTimeout(discoverProvider, 1500); }
+        else { setTip(t("restartFailed") + (r.error || "")); }
+      }).catch(function (err) { setTip(t("restartFailed") + err); });
     } else if ((el = findEl(e, "a-update-check"))) {
-      setTip("正在检查更新…");
+      setTip(t("checkingUpdate"));
       api("/api/shell/update-check").then(function (r) {
         $("kv-ver").textContent = r.current;
         state.latest = r.latest;
         $("a-update-apply").disabled = !r.has_update;
-        setTip(r.error ? "检查失败: " + r.error : (r.has_update ? "发现新版本 " + r.latest : "已是最新版本"));
-      }).catch(function (err) { setTip("检查失败: " + err); });
+        setTip(r.error ? t("checkFailed") + r.error : (r.has_update ? t('newVersion') + r.latest : t('latest')));
+      }).catch(function (err) { setTip(t("checkFailed") + err); });
     } else if ((el = findEl(e, "a-update-apply"))) {
       if (!state.latest) return;
-      if (!confirm("确定更新到 " + state.latest + "？更新包地址需 M5 打包流水线产出。")) return;
-      setTip("更新：等待打包流水线接入下载 URL…");
+      if (!confirm(t('confirmUpdate') + state.latest +  + t('updateNote'))) return;
+      setTip(t('updateWaiting'));
     } else if ((el = findEl(e, "a-provider-apply"))) {
       var sel = $("a-provider-select");
       var v = sel ? sel.value : "";
-      if (!v) { setTip("请先选择 provider"); return; }
+      if (!v) { setTip(t("selectProvider")); return; }
       state.providerManual = true;
       state.provider = v;
       refreshBalance();
