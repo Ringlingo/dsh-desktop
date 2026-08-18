@@ -78,7 +78,7 @@
 
 ```powershell
 # 1. 克隆仓库
-git clone https://github.com/yourname/dsh-desktop.git
+git clone https://github.com/Ringlingo/dsh-desktop.git
 cd dsh-desktop
 
 # 2. 准备 runtime（从 dsh-portable 或 npm 安装）
