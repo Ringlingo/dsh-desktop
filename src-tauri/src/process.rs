@@ -417,7 +417,11 @@ fn find_git_bash() -> String {
 /// Windows: taskkill /T 按 PID 终止进程树。
 #[cfg(windows)]
 fn kill_tree(pid: u32) {
-    let _ = Command::new("taskkill").args(["/T", "/F", "/PID", &pid.to_string()]).status();
+    use std::os::windows::process::CommandExt;
+    let _ = Command::new("taskkill")
+        .args(["/T", "/F", "/PID", &pid.to_string()])
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
+        .status();
 }
 
 #[cfg(not(windows))]
