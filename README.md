@@ -22,7 +22,7 @@
 
 ## 下载
 
-从 [GitHub Releases](../../releases) 下载最新版本的 `dsh-desktop-vX.X.X.zip`，解压后双击 `dsh-desktop.exe` 即可使用。
+从 [GitHub Releases](../../releases) 下载最新版本的 `dsh-desktop-lite-vX.X.X.zip`，解压后双击 `dsh-desktop-lite.exe` 即可使用。
 
 无需安装 Node.js，无需配置环境，零依赖开箱即用。
 
@@ -82,8 +82,8 @@
 
 ```powershell
 # 1. 克隆仓库
-git clone https://github.com/Ringlingo/dsh-desktop.git
-cd dsh-desktop
+git clone https://github.com/Ringlingo/dsh-desktop-lite.git
+cd dsh-desktop-lite
 
 # 2. 准备 runtime（从 dsh-portable 或 npm 安装）
 # runtime/node/node.exe — Node.js 二进制
@@ -98,13 +98,13 @@ cd ..
 .\scripts\build-release.ps1
 ```
 
-构建产物在 `release/dsh-desktop/` 目录。
+构建产物在 `release/dsh-desktop-lite/` 目录。
 
 ## 目录结构
 
 ```
-dsh-desktop/
-├── dsh-desktop.exe       # 应用程序（~20 MB）
+dsh-desktop-lite/
+├── dsh-desktop-lite.exe       # 应用程序（~20 MB）
 ├── ui/
 │   └── index.html        # 启动加载页
 ├── runtime/
@@ -180,7 +180,7 @@ dsh-desktop/
 
 ## Download
 
-Download the latest `dsh-desktop-vX.X.X.zip` from [GitHub Releases](../../releases), extract, and double-click `dsh-desktop.exe`.
+Download the latest `dsh-desktop-lite-vX.X.X.zip` from [GitHub Releases](../../releases), extract, and double-click `dsh-desktop-lite.exe`.
 
 No Node.js installation, no environment setup — zero dependencies out of the box.
 
@@ -240,8 +240,8 @@ No Node.js installation, no environment setup — zero dependencies out of the b
 
 ```powershell
 # 1. Clone the repo
-git clone https://github.com/Ringlingo/dsh-desktop.git
-cd dsh-desktop
+git clone https://github.com/Ringlingo/dsh-desktop-lite.git
+cd dsh-desktop-lite
 
 # 2. Prepare runtime (from dsh-portable or npm)
 # runtime/node/node.exe — Node.js binary
@@ -256,13 +256,13 @@ cd ..
 .\scripts\build-release.ps1
 ```
 
-Output is in the `release/dsh-desktop/` directory.
+Output is in the `release/dsh-desktop-lite/` directory.
 
 ## Directory Structure
 
 ```
-dsh-desktop/
-├── dsh-desktop.exe       # Application (~20 MB)
+dsh-desktop-lite/
+├── dsh-desktop-lite.exe       # Application (~20 MB)
 ├── ui/
 │   └── index.html        # Splash loading page
 ├── runtime/

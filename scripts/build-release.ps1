@@ -1,4 +1,4 @@
-# build-release.ps1 - 构建 dsh-desktop 免安装包
+# build-release.ps1 - 构建 dsh-desktop-lite 免安装包
 # 用法: .\scripts\build-release.ps1
 
 param(
@@ -8,9 +8,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
-$ReleaseDir = "$Root\release\dsh-desktop"
+$ReleaseDir = "$Root\release\dsh-desktop-lite"
 
-Write-Host "=== dsh-desktop v$Version 构建 ===" -ForegroundColor Cyan
+Write-Host "=== dsh-desktop-lite v$Version 构建 ===" -ForegroundColor Cyan
 Write-Host "源目录: $SourceDir"
 Write-Host "输出目录: $ReleaseDir"
 
@@ -37,8 +37,8 @@ if (-not (Test-Path $ExeSrc)) {
     Write-Host "exe 不存在，尝试 debug 版本..." -ForegroundColor Red
     $ExeSrc = "$SourceDir\src-tauri\target\debug\dsh-portable.exe"
 }
-Copy-Item $ExeSrc "$ReleaseDir\dsh-desktop.exe"
-Write-Host "  复制: dsh-desktop.exe ($([math]::Round((Get-Item $ExeSrc).Length/1MB, 1)) MB)"
+Copy-Item $ExeSrc "$ReleaseDir\dsh-desktop-lite.exe"
+Write-Host "  复制: dsh-desktop-lite.exe ($([math]::Round((Get-Item $ExeSrc).Length/1MB, 1)) MB)"
 
 # 4. 复制 ui/index.html
 Write-Host "`n[4/6] 复制 ui..." -ForegroundColor Yellow
@@ -121,7 +121,7 @@ Write-Host "输出: $ReleaseDir"
 Write-Host "大小: $([math]::Round($TotalSize/1MB, 1)) MB ($FileCount files)"
 
 # 8. 打包 zip
-$ZipPath = "$Root\release\dsh-desktop-v$Version.zip"
+$ZipPath = "$Root\release\dsh-desktop-lite-v$Version.zip"
 Write-Host "`n[8/8] 打包: $ZipPath" -ForegroundColor Yellow
 Compress-Archive -Path $ReleaseDir -DestinationPath $ZipPath -Force
 $ZipSize = (Get-Item $ZipPath).Length
