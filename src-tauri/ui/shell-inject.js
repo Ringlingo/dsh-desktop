@@ -756,7 +756,7 @@
       logBtns[2].textContent = state.logPaused ? t("resume") : t("pause");
     }
   }
-  setInterval(checkLang, 5000);
+  setInterval(checkLang, 2000);
 
   // 抗 dsh 路由变化（history.pushState 切换会卸载当前组件树，可能影响注入 UI）
   window.addEventListener("popstate", function () {
