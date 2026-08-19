@@ -2,7 +2,7 @@
   <img src="assets/favicon.svg" alt="DSH Desktop" width="182">
 </p>
 
-<h3 align="center">DeepSeek Harness Desktop</h3>
+<h3 align="center">DeepSeek Harness Desktop Lite</h3>
 
 <p align="center">
   <b>中文</b> · <a href="#english">English</a>
